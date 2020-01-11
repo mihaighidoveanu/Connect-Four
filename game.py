@@ -43,8 +43,9 @@ class Game:
             else:
                 is_player1 = not is_player1
 
-
-
 if __name__ == "__main__":
-    game = Game(PlayerMM(4, True), PlayerMM(4, False))
+    depth = 8
+    player1 = PlayerAB
+    player2 = PlayerAB
+    game = Game(player1(depth, True), player2(depth, False))
     game.play()

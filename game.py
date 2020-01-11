@@ -3,49 +3,48 @@ from player import PlayerMM, PlayerAB, ManualPlayer
 
 class Game:
 
-
-    def __init__(self, startBoard, player1, player2):
-        self.startBoard = startBoard
+    def __init__(self, player1, player0):
+        self.board = Board()
         self.player1 = player1
-        self.player2 = player2
+        self.player0 = player0
 
-    ########################################################################
-    #                     Simulate a Local Game
-    ########################################################################
+    def play(self):
 
-    def simulateLocalGame(self):
-
-        board = Board(orig=self.startBoard)
-        isPlayer1 = True
+        is_player1 = True
 
         while(True):
 
-            #finds the move to make
-            if isPlayer1:
-                move = self.player1.findMove(board)
+            # take turns
+            if is_player1:
+                move = self.player1.bestmove(self.board)
             else:
-                move = self.player2.findMove(board)
+                move = self.player0.bestmove(self.board)
 
-            #makes the move
-            board.makeMove(move)
-            board.print()
+            player = "Player " + ('1' if is_player1 else '0')
+            print(f'{player} moved at {move}')
 
-            #determines if the game is over or not
-            isOver = board.isTerminal()
-            if isOver == 0:
+            #make the move
+            self.board.makeMove(move)
+            print(self.board)
+            print(self.board.numMoves)
+            print(self.board.lastMove)
+
+            # check if game ended
+            did_end = self.board.end()
+            if did_end == Board.IS_DRAW:
                 print("It is a draw!")
                 break
-            elif isOver == 1:
+            elif did_end == Board.PLAYER_1_WINS:
                 print("Player 1 wins!")
                 break
-            elif isOver == 2:
-                print("Player 2 wins!")
+            elif did_end == Board.PLAYER_0_WINS:
+                print("Player 0 wins!")
                 break
             else:
-                isPlayer1 = not isPlayer1
+                is_player1 = not is_player1
 
 
 
 if __name__ == "__main__":
-    game = Game(Board(), PlayerAB(5, True), PlayerAB(5, False))
-    game.simulateLocalGame()
+    game = Game(PlayerMM(4, True), PlayerMM(4, False))
+    game.play()

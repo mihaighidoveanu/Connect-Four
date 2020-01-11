@@ -2,216 +2,180 @@ import math
 
 from board import Board
 
-## Partnered with Nick Konich
 class Player:
 
-    def __init__(self, depthLimit, isPlayerOne):
+    def __init__(self, depth, is_player1):
 
-        self.isPlayerOne = isPlayerOne
-        self.depthLimit = depthLimit
+        self.is_player1 = is_player1
+        self.depth = depth
 
-    # Returns a heuristic for the board position
-    # Good positions for 0 pieces are positive and good positions for 1 pieces
-    # are be negative
     def heuristic(self, board):
         heur = 0
         state = board.board
-        for i in range(0, board.WIDTH):
-            for j in range(0, board.HEIGHT):
+        for i in range(0, Board.WIDTH):
+            for j in range(0, Board.HEIGHT):
                 # check horizontal streaks
                 try:
-                    # add player one streak scores to heur
-                    if state[i][j] == state[i + 1][j] == 0:
-                        heur += 10
-                    if state[i][j] == state[i + 1][j] == state[i + 2][j] == 0:
-                        heur += 100
-                    if state[i][j] == state[i+1][j] == state[i+2][j] == state[i+3][j] == 0:
-                        heur += 10000
+                    score = 0
+                    # add player_1  streak scores to heur
+                    if state[i][j] == state[i + 1][j]:
+                        score = 10
+                    if state[i][j] == state[i + 1][j] == state[i + 2][j]:
+                        score = 100
+                    if state[i][j] == state[i+1][j] == state[i+2][j] == state[i+3][j]:
+                        score = 10000
 
-                    # subtract player two streak score to heur
-                    if state[i][j] == state[i + 1][j] == 1:
-                        heur -= 10
-                    if state[i][j] == state[i + 1][j] == state[i + 2][j] == 1:
-                        heur -= 100
-                    if state[i][j] == state[i+1][j] == state[i+2][j] == state[i+3][j] == 1:
-                        heur -= 10000
+                    # player1 streak scores are added (he is max)
+                    # player0 streak scores are substracted (he is min)
+                    player = state[i][j]
+                    if player == 1:
+                        heur += score
+                    else:
+                        heur -= score
+
                 except IndexError:
                     pass
 
                 # check vertical streaks
                 try:
-                    # add player one vertical streaks to heur
-                    if state[i][j] == state[i][j + 1] == 0:
-                        heur += 10
-                    if state[i][j] == state[i][j + 1] == state[i][j + 2] == 0:
-                        heur += 100
-                    if state[i][j] == state[i][j+1] == state[i][j+2] == state[i][j+3] == 0:
-                        heur += 10000
+                    score = 0
+                    if state[i][j] == state[i][j + 1]:
+                        score = 10
+                    if state[i][j] == state[i][j + 1] == state[i][j + 2]:
+                        score = 100
+                    if state[i][j] == state[i][j+1] == state[i][j+2] == state[i][j+3]:
+                        score = 10000
 
-                    # subtract player two streaks from heur
-                    if state[i][j] == state[i][j + 1] == 1:
-                        heur -= 10
-                    if state[i][j] == state[i][j + 1] == state[i][j + 2] == 1:
-                        heur -= 100
-                    if state[i][j] == state[i][j+1] == state[i][j+2] == state[i][j+3] == 1:
-                        heur -= 10000
+                    player = state[i][j]
+                    if player == 1:
+                        heur += score
+                    else:
+                        heur -= score
+
                 except IndexError:
                     pass
 
-                # check positive diagonal streaks
+                # check primary diagonal streaks
                 try:
-                    # add player one streaks to heur
-                    if not j + 3 > board.HEIGHT and state[i][j] == state[i + 1][j + 1] == 0:
-                        heur += 100
-                    if not j + 3 > board.HEIGHT and state[i][j] == state[i + 1][j + 1] == state[i + 2][j + 2] == 0:
-                        heur += 100
-                    if not j + 3 > board.HEIGHT and state[i][j] == state[i+1][j + 1] == state[i+2][j + 2] \
-                            == state[i+3][j + 3] == 0:
-                        heur += 10000
-
-                    # add player two streaks to heur
-                    if not j + 3 > board.HEIGHT and state[i][j] == state[i + 1][j + 1] == 1:
-                        heur -= 100
-                    if not j + 3 > board.HEIGHT and state[i][j] == state[i + 1][j + 1] == state[i + 2][j + 2] == 1:
-                        heur -= 100
-                    if not j + 3 > board.HEIGHT and state[i][j] == state[i+1][j + 1] == state[i+2][j + 2] \
+                    score = 0
+                    if state[i][j] == state[i + 1][j + 1] == 1:
+                        score = 10
+                    if state[i][j] == state[i + 1][j + 1] == state[i + 2][j + 2] == 1:
+                        score = 100
+                    if state[i][j] == state[i+1][j + 1] == state[i+2][j + 2] \
                             == state[i+3][j + 3] == 1:
-                        heur -= 10000
+                        score = 10000
+
+                    player = state[i][j]
+                    if player == 1:
+                        heur += score
+                    else:
+                        heur -= score
                 except IndexError:
                     pass
 
-                # check negative diagonal streaks
+                # check secondary diagonal streaks
                 try:
-                    # add  player one streaks
-                    if not j - 3 < 0 and state[i][j] == state[i+1][j - 1] == 0:
-                        heur += 10
-                    if not j - 3 < 0 and state[i][j] == state[i+1][j - 1] == state[i+2][j - 2] == 0:
-                        heur += 100
-                    if not j - 3 < 0 and state[i][j] == state[i+1][j - 1] == state[i+2][j - 2] \
-                            == state[i+3][j - 3] == 0:
-                        heur += 10000
-
-                    # subtract player two streaks
-                    if not j - 3 < 0 and state[i][j] == state[i+1][j - 1] == 1:
-                        heur -= 10
-                    if not j - 3 < 0 and state[i][j] == state[i+1][j - 1] == state[i+2][j - 2] == 1:
-                        heur -= 100
-                    if not j - 3 < 0 and state[i][j] == state[i+1][j - 1] == state[i+2][j - 2] \
+                    score = 0
+                    if state[i][j] == state[i+1][j - 1] == 1:
+                        score = 10
+                    if state[i][j] == state[i+1][j - 1] == state[i+2][j - 2] == 1:
+                        score = 100
+                    if state[i][j] == state[i+1][j - 1] == state[i+2][j - 2] \
                             == state[i+3][j - 3] == 1:
-                        heur -= 10000
+                        score = 10000
+
+                    player = state[i][j]
+                    if player == 1:
+                        heur += score
+                    else:
+                        heur -= score
+
                 except IndexError:
                     pass
         return heur
 
-
-
-
 class PlayerMM(Player):
-    def __init__(self, depthLimit, isPlayerOne):
-        super().__init__(depthLimit, isPlayerOne)
 
-    # returns the optimal column to move in by implementing the MiniMax algorithm
-    def findMove(self, board):
-        #return self.mmH(board, self.depthLimit, self.isPlayerOne)
-        #return self.minMaxHelper(board, self.depthLimit, self.isPlayerOne)
-        score, move = self.miniMax(board, self.depthLimit, self.isPlayerOne)
-        print(self.isPlayerOne, "move made", move)
+    # runs minmax to find the optimal move
+    def bestmove(self, board):
+        score, move = self.minimax(board, self.depth, self.is_player1)
         return move
 
-    # findMove helper function using miniMax algorithm
-    def miniMax(self, board, depth, player):
-        if board.isTerminal() == 0:
-            return -math.inf if player else math.inf, -1
+    # minimax algorithm
+    def minimax(self, board, depth, is_player1):
+        if board.end() == Board.IS_DRAW:
+            return -math.inf if is_player1 else math.inf, -1
         elif depth == 0:
             return self.heuristic(board), -1
 
-        if player:
-            bestScore = -math.inf
-            shouldReplace = lambda x: x > bestScore
+        if is_player1:
+            best_score = -math.inf
+            is_better = lambda x: x > best_score
         else:
-            bestScore = math.inf
-            shouldReplace = lambda x: x < bestScore
+            best_score = math.inf
+            is_better = lambda x: x < best_score
 
-        bestMove = -1
+        best_move = -1
 
         children = board.children()
         for child in children:
             move, childboard = child
-            temp = self.miniMax(childboard, depth-1, not player)[0]
-            if shouldReplace(temp):
-                bestScore = temp
-                bestMove = move
-        return bestScore, bestMove
-
-    # minimax helper function - unused
-    def mmH(self, board, depth, player):
-
-        if depth == 0:
-            boards = board.children()
-            scores = {}
-            for i in boards:
-                scores[i[0]] = self.heuristic(i[1])
-            if player:
-                return max(scores, key=lambda k: scores[k])
-            else:
-                return min(scores, key=lambda k: scores[k])
-        else:
-            return self.mmH(board,depth-1,not player)
-
+            # print('Move, ', move)
+            temp, _ = self.minimax(childboard, depth - 1, not is_player1)
+            if is_better(temp):
+                best_score = temp
+                best_move = move
+        return best_score, best_move
 
 class PlayerAB(Player):
 
-    def __init__(self, depthLimit, isPlayerOne):
-        super().__init__(depthLimit, isPlayerOne)
-
-    # returns the optimal column to move in by implementing the Alpha-Beta algorithm
-    def findMove(self, board):
-        score, move = self.alphaBeta(board, self.depthLimit, self.isPlayerOne, -math.inf, math.inf)
+    def bestmove(self, board):
+        score, move = self.alphabeta(board, self.depth, self.is_player1, -math.inf, math.inf)
         return move
 
-    # findMove helper function, utilizing alpha-beta pruning within the  minimax algorithm
-    def alphaBeta(self, board, depth, player, alpha, beta):
-        if board.isTerminal() == 0:
-            return -math.inf if player else math.inf, -1
+    def alphabeta(self, board, depth, is_player1, alpha, beta):
+        if board.end() == Board.IS_DRAW:
+            return -math.inf if is_player1 else math.inf, -1
         elif depth == 0:
             return self.heuristic(board), -1
 
-        if player:
-            bestScore = -math.inf
-            shouldReplace = lambda x: x > bestScore
+        if is_player1:
+            best_score = -math.inf
+            is_better = lambda x: x > best_score
         else:
-            bestScore = math.inf
-            shouldReplace = lambda x: x < bestScore
+            best_score = math.inf
+            is_better = lambda x: x < best_score
 
-        bestMove = -1
+        best_move = -1
 
         children = board.children()
         for child in children:
             move, childboard = child
-            temp = self.alphaBeta(childboard, depth-1, not player, alpha, beta)[0]
-            if shouldReplace(temp):
-                bestScore = temp
-                bestMove = move
-            if player:
+            temp, _ = self.alphabeta(childboard, depth - 1, not is_player1, alpha, beta)
+            if is_better(temp):
+                best_score = temp
+                best_move = move
+            if is_player1:
                 alpha = max(alpha, temp)
             else:
                 beta = min(beta, temp)
             if alpha >= beta:
                 break
-        return bestScore, bestMove
+        return best_score, best_move
 
 
 class ManualPlayer(Player):
-    def findMove(self, board):
+    def __init__(self):
+        super().__init__(depth = None, is_player1 = None)
+
+    def bestmove(self, board):
         opts = " "
         for c in range(board.WIDTH):
             opts += " " + (str(c + 1) if len(board.board[c]) < 6 else ' ') + "  "
         print(opts)
 
-        col = input("Place an " + ('O' if self.isPlayerOne else 'X') + " in column: ")
+        col = input("Place an " + ('X' if self.is_player1 else '0') + " in column: ")
         col = int(col) - 1
         return col
-
-
-
 

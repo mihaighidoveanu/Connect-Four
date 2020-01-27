@@ -44,7 +44,7 @@ class Game:
                 is_player1 = not is_player1
 
 if __name__ == "__main__":
-    depth = 8
+    depth = 6
     player1 = PlayerAB
     player2 = PlayerAB
     game = Game(player1(depth, True), player2(depth, False))
